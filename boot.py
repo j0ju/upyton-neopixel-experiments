@@ -1,3 +1,6 @@
+# - python - micropytnon -
+# (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
+
 # boot.py -- run on boot-up
 
 # increase CPU speed of Wemos D1/ESP8266
@@ -16,3 +19,5 @@
 #    strip.off(np)
 #except Exception as e:
 #    raise(e)
+
+# vim: noet ts=4 sw=4 ft=python

@@ -1,3 +1,6 @@
+# - python - micropytnon -
+# (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
+
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 
@@ -100,3 +103,5 @@ def paint(np, colortable, istart = 0):
     for  i in range(0, np.n):
         np[i] = colortable[(istart + i) % ncolors]
     np.write()
+
+# vim: noet ts=4 sw=4 ft=python
