@@ -1,0 +1,15 @@
+[MESSAGES CONTROL]
+
+disable=invalid-name,
+        import-outside-toplevel,
+        consider-using-enumerate,
+        consider-using-in,
+        too-many-arguments
+
+# Why disabled?
+#  * invalid-name - micropython uses also CamelCase
+#  * import-outside-toplevel - only iport what we need in a function
+#  * consider-using-enumerate - not supported on every floating around version of uPython
+#                               for in case of older boards
+#  * consider-using-in - in case of `in` for a two element set this makes no sense
+#

@@ -1,7 +1,5 @@
-# - python - micropytnon -
+""" micropython - main.py -- put your code here! """
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
-
-# main.py -- put your code here!
 
 #import strip
 

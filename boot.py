@@ -1,7 +1,4 @@
-# - python - micropytnon -
-# (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
-
-# boot.py -- run on boot-up
+""" micropython - boot.py -- run on boot-up """
 
 # increase CPU speed of Wemos D1/ESP8266
 #from machine import freq

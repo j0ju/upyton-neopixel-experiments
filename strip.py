@@ -1,4 +1,4 @@
-# - python - micropytnon -
+""" simple module to control WS2812b LEDs """
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
 
 BLACK = (0,0,0)
@@ -46,9 +46,10 @@ RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farbe
 ]
 
 def wanderingPixel(fg = WHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
-    from machine import Pin
-    from neopixel import NeoPixel
-    from time import sleep_ms
+    """ this implements one wandering pixel on a 2D LED strip """
+    from machine import Pin       # pylint: disable=import-error
+    from neopixel import NeoPixel # pylint: disable=import-error
+    from time import sleep_ms     # pylint: disable=no-name-in-module
 
     gpio = Pin(pin, Pin.OUT)
     np = NeoPixel(gpio, n)
@@ -69,12 +70,13 @@ def wanderingPixel(fg = WHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
             sleep_ms(delay_ms)
     except KeyboardInterrupt as e:
         off(np)
-        raise(e)
+        raise e
 
 def movingPaint(colortable, n = 15, pin = 0, delay_ms = 100):
-    from machine import Pin
-    from neopixel import NeoPixel
-    from time import sleep_ms
+    """ changes colors of LED stip according to a table and cycles through it by time """
+    from machine import Pin       # pylint: disable=import-error
+    from neopixel import NeoPixel # pylint: disable=import-error
+    from time import sleep_ms     # pylint: disable=no-name-in-module
 
     gpio = Pin(pin, Pin.OUT)
     np = NeoPixel(gpio, n)
@@ -88,19 +90,22 @@ def movingPaint(colortable, n = 15, pin = 0, delay_ms = 100):
             sleep_ms(delay_ms)
     except KeyboardInterrupt as e:
         off(np)
-        raise(e)
+        raise e
 
 def off(np):
+    """ switches all LEDs to black off a strip """
     fill(np, BLACK)
 
 def fill(np, color):
-    for  i in range(0, np.n):
+    """ fills all LEDs with one color """
+    for  i in range(0, len(np)):
         np[i] = color
     np.write()
 
 def paint(np, colortable, istart = 0):
+    """ changes colors of LED stip according to a table """
     ncolors = len(colortable)
-    for  i in range(0, np.n):
+    for  i in range(0, len(np)):
         np[i] = colortable[(istart + i) % ncolors]
     np.write()
 
