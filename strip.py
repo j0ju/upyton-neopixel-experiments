@@ -1,8 +1,14 @@
 BLACK = (0,0,0)
 WHITE = (255,255,255)
+
 RED = (255,0,0)
+DARKRED = (64,0,0)
+
 GREEN = (0,255,0)
+DARKGREEN = (0,64,0)
+
 BLUE = (0,0,255)
+DARKBLUE = (0,0,64)
 
 RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farben
     (128,   0,   0),
@@ -36,57 +42,61 @@ RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farbe
     (168,   0, 185)
 ]
 
-def wanderingPixel(color = WHITE, n = 15, back = BLACK, pin = 0, delay_ms = 50):
-    from machine import Pin
-    from neopixel import NeoPixel
-    from time import sleep_ms
-
-    gpio = Pin(pin, Pin.OUT)   # set GPIO0 to output to drive NeoPixels
-    np = NeoPixel(gpio, n)   # create NeoPixel driver on GPIO0 for 8 pixels
-    n = n - 1
-
-    i = 0
-    step = -1
-
-    try:
-        while True:
-            np[i] = back
-            if i == 0 or i == n:
-                step = step * -1
-            i = i + step
-            np[i] = color
-            np.write()
-            sleep_ms(delay_ms)
-    except KeyboardInterrupt as e:
-        fill(np, BLACK)
-        raise(e)
-
-def movingPaint(colors, n = 15, pin = 0, delay_ms = 100):
+def wanderingPixel(fg = WHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
     from machine import Pin
     from neopixel import NeoPixel
     from time import sleep_ms
 
     gpio = Pin(pin, Pin.OUT)
     np = NeoPixel(gpio, n)
-    ncolors = len(colors)
+    n = n - 1
+
+    i = 0
+    step = -1
+
+    try:
+        fill(np, bg)
+        while True:
+            np[i] = bg
+            if i == 0 or i == n:
+                step = step * -1
+            i = i + step
+            np[i] = fg
+            np.write()
+            sleep_ms(delay_ms)
+    except KeyboardInterrupt as e:
+        off(np)
+        raise(e)
+
+def movingPaint(colortable, n = 15, pin = 0, delay_ms = 100):
+    from machine import Pin
+    from neopixel import NeoPixel
+    from time import sleep_ms
+
+    gpio = Pin(pin, Pin.OUT)
+    np = NeoPixel(gpio, n)
+    ncolors = len(colortable)
     istart = 0
 
     try:
         while True:
-            paint(np, colors, istart = istart)
+            paint(np, colortable, istart = istart)
             istart = (istart + 1) % ncolors
             sleep_ms(delay_ms)
     except KeyboardInterrupt as e:
-        fill(np, BLACK)
+        off(np)
         raise(e)
+
+def off(np):
+    fill(np, BLACK)
 
 def fill(np, color):
     for  i in range(0, np.n):
         np[i] = color
     np.write()
 
-def paint(np, colors, istart = 0):
-    ncolors = len(colors)
+def paint(np, colortable, istart = 0):
+    ncolors = len(colortable)
     for  i in range(0, np.n):
-        np[i] = colors[(istart + i) % ncolors]
+        np[i] = colortable[(istart + i) % ncolors]
     np.write()
