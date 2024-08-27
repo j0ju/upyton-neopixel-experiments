@@ -2,16 +2,20 @@
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
 
 BLACK = (0,0,0)
+DIMWHITE = (32,32,32)
 WHITE = (255,255,255)
 
 RED = (255,0,0)
-DARKRED = (64,0,0)
+DIMRED = (32,0,0)
+DARKRED = (8,0,0)
 
 GREEN = (0,255,0)
-DARKGREEN = (0,64,0)
+DIMGREEN = (0,32,0)
+DARKGREEN = (0,8,0)
 
 BLUE = (0,0,255)
-DARKBLUE = (0,0,64)
+DIMBLUE = (0,0,32)
+DARKBLUE = (0,0,8)
 
 RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farben
     (128,   0,   0),
@@ -45,7 +49,8 @@ RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farbe
     (168,   0, 185)
 ]
 
-def wanderingPixel(fg = WHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
+# pin = 0 --> D3 on ESP8266 Wemos D1
+def wanderingPixel(fg = DIMWHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
     """ this implements one wandering pixel on a 2D LED strip """
     from machine import Pin       # pylint: disable=import-error
     from neopixel import NeoPixel # pylint: disable=import-error
