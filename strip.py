@@ -2,19 +2,19 @@
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
 
 BLACK = (0,0,0)
-DIMWHITE = (32,32,32)
+DIMWHITE = (16,16,16)
 WHITE = (255,255,255)
 
 RED = (255,0,0)
-DIMRED = (32,0,0)
+DIMRED = (16,0,0)
 DARKRED = (8,0,0)
 
 GREEN = (0,255,0)
-DIMGREEN = (0,32,0)
+DIMGREEN = (0,16,0)
 DARKGREEN = (0,8,0)
 
 BLUE = (0,0,255)
-DIMBLUE = (0,0,32)
+DIMBLUE = (0,0,16)
 DARKBLUE = (0,0,8)
 
 RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farben
