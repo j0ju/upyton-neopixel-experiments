@@ -14,11 +14,15 @@ SPACESHIP = ( ( 1, 0, 0, 1, 0),
               ( 0, 1, 1, 1, 1)
             )
 
-# example:
-#   import GameOfLife2D
-#   g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.GLIDER)
-#   g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
-#   g.run()
+""" example:
+import GameOfLife2D
+g = GameOfLife2D.GameOfLife2D()
+g.run()
+
+g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.GLIDER)
+g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
+g.run()
+"""
 
 class GameOfLife2D:
     # pin = 5 ---> D1 on Wemos D1
@@ -26,6 +30,8 @@ class GameOfLife2D:
     def __init__(self, x = 16, y = 16, pin = 5, dead = strip.BLACK, alive = strip.DIMWHITE, dying = strip.DIMWHITE, born = strip.DIMWHITE, forecast = strip.BLACK, seed = None):
         from machine import Pin       # pylint: disable=import-error
         from neopixel import NeoPixel # pylint: disable=import-error
+
+        print("init(): %s/%s pin=%s)" % (x, y, pin))
 
         self.x = x
         self.y = y
@@ -43,12 +49,15 @@ class GameOfLife2D:
 
         self.world = []
         self.lastGeneration = []
+        self.lastLastGeneration = []
         for y in range(0, self.y):
             self.world.append([])
             self.lastGeneration.append([])
+            self.lastLastGeneration.append([])
             for x in range(0, self.x):
                 self.world[y].append(0)
                 self.lastGeneration[y].append(0)
+                self.lastLastGeneration[y].append(0)
 
         self.seed(seed)
     
@@ -64,6 +73,7 @@ class GameOfLife2D:
 
     # seed world and prepare world array for swaping
     def seed(self, seed = None):
+        print("seed()")
         from random import getrandbits
         for y in range(0, self.y):
             for x in range(0, self.x):
@@ -126,11 +136,12 @@ class GameOfLife2D:
                 return 0
 
     def step(self): # pylint: disable=missing-function-docstring
-        nextGeneration = self.lastGeneration
+        nextGeneration = self.lastLastGeneration
         for x in range(0, self.x):
             for y in range(0, self.y):
                 nextGeneration[y][x] = self.nextState(x, y)
 
+        self.lastLastGeneration = self.lastGeneration
         self.lastGeneration = self.world
         self.world = nextGeneration
         self.display()
@@ -142,14 +153,33 @@ class GameOfLife2D:
                 c = c + self.world[y][x]
         return c
 
+    def compareWorld(self, w1, w2):
+        #print("compareWorkd()")
+        for y in range(0, self.y):
+            for x in range(0, self.x):
+                if not w1[y][x] == w2[y][x]:
+                    return False
+        return True
+
     def run(self, delay=30):          # pylint: disable=missing-function-docstring
         from time import sleep_ms     # pylint: disable=no-name-in-module
         population = self.populationCount()
         lastPopulation = 0
+        lastLastPopulation = 0
         while True:
-            #if population == lastPopulation:
-            #    self.seed()
-            #lastPopulation = population
+            # reseed decisions
+            if population == 0:
+                print("run: pop == 0")
+                self.seed()
+            elif population == lastLastPopulation:
+                print("run: pop == lastLastPop")
+                if self.compareWorld(self.world, self.lastLastGeneration):
+                    print("run: 2-cycle detected")
+                    self.seed()
+
+            lastLastPopulation = lastPopulation
+            lastPopulation = population
+
             self.step()
             population = self.populationCount()
             sleep_ms(delay)
