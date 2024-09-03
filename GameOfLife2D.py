@@ -2,6 +2,7 @@
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
 
 import strip
+from Field import Field
 
 GLIDER = ( ( 1, 1, 1 ),
            ( 1, 0, 0 ),
@@ -24,22 +25,12 @@ g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
 g.run()
 """
 
-class GameOfLife2D:
+class GameOfLife2D(Field):
     # pin = 5 ---> D1 on Wemos D1
     # pin = 5 ---> D3 on Seeed Studio ESP32-C3
     def __init__(self, x = 16, y = 16, pin = 5, dead = strip.BLACK, alive = strip.DIMWHITE, dying = strip.DIMWHITE, born = strip.DIMWHITE, forecast = strip.BLACK, seed = None):
-        from machine import Pin       # pylint: disable=import-error
-        from neopixel import NeoPixel # pylint: disable=import-error
-
-        print("init(): %s/%s pin=%s)" % (x, y, pin))
-
-        self.x = x
-        self.y = y
-        n = x * y
-
-        gpio = Pin(pin, Pin.OUT)
-        self.np = NeoPixel(gpio, n)
-        strip.off(self.np)
+        print("GameOfLife2D::__init__(): %s/%s pin=%s)" % (x, y, pin))
+        super().__init__(x = x, y = y, pin = pin)
 
         self.DEAD = dead
         self.ALIVE = alive
@@ -50,33 +41,23 @@ class GameOfLife2D:
         self.world = []
         self.lastGeneration = []
         self.lastLastGeneration = []
-        for y in range(0, self.y):
+        for y in range(0, self.Y):
             self.world.append([])
             self.lastGeneration.append([])
             self.lastLastGeneration.append([])
-            for x in range(0, self.x):
+            for x in range(0, self.X):
                 self.world[y].append(0)
                 self.lastGeneration[y].append(0)
                 self.lastLastGeneration[y].append(0)
 
-        self.seed(seed)
+        self.Seed(seed)
     
-    # be aware, we cannot use standard framebuffer calculations here on most WS2812 strips/fields
-    # as they are enumbered as a snake on PCBs
-    #  0   1   2   3   4   5  y = 0  ==> y % 2 == 0 ==> cell = py * y   +  px
-    # 11  10   9   8   7   6  y = 1  ==> y % 2 == 1 ==> cell = py * y+1 - (px + 1)
-    # 12  13  14  15  16  17  y = 2
-    # 18  19  20  21  22  23
-    def xy2cell(self, x, y):
-        signum = (1, -1)
-        return (y+y%2) * self.y + signum[y%2] * (x+y%2)
-
     # seed world and prepare world array for swaping
-    def seed(self, seed = None):
-        print("seed()")
+    def Seed(self, seed = None):
+        print("Seed()")
         from random import getrandbits
-        for y in range(0, self.y):
-            for x in range(0, self.x):
+        for y in range(0, self.Y):
+            for x in range(0, self.X):
                 if seed == None:
                     self.world[y][x] = getrandbits(1)
                 else:
@@ -85,35 +66,34 @@ class GameOfLife2D:
                         self.world[y][x] = v
                     except IndexError:
                         pass
-        self.display()
+        self.Update()
 
-    def display(self):
+    def Update(self):
         m = (self.DEAD, self.ALIVE)
-        for y in range(0, self.y):
-            for x in range(0, self.x):
+        for y in range(0, self.Y):
+            for x in range(0, self.X):
                 if self.world[y][x] == 1:
                     if self.lastGeneration[y][x] == 0:
-                        self.np[self.xy2cell(x,y)] = self.BORN
+                        self[x,y] = self.BORN
                     elif self.nextState(x,y) == 0:
-                        self.np[self.xy2cell(x,y)] = self.DYING
+                        self[x,y] = self.DYING
                     else:
-                        self.np[self.xy2cell(x,y)] = m[self.world[y][x]]
+                        self[x,y] = m[self.world[y][x]]
                 else:
                     if self.nextState(x,y) == 1:
-                        self.np[self.xy2cell(x,y)] = self.FORECAST
+                        self[x,y] = self.FORECAST
                     else:
-                        self.np[self.xy2cell(x,y)] = m[self.world[y][x]]
-
-        self.np.write()
+                        self[x,y] = m[self.world[y][x]]
+        Field.Update(self)
 
     def neighbourCount(self, x, y): # pylint: disable=missing-function-docstring
         count = 0
         for dx in (-1, 0, 1):
-            px = (x + dx) % self.x
+            px = (x + dx) % self.X
             for dy in (-1, 0, 1):
                 if dy == 0 and dx == 0:
                     continue
-                py = (y + dy) % self.y
+                py = (y + dy) % self.Y
                 count = count + self.world[py][px]
         return count
 
@@ -135,52 +115,53 @@ class GameOfLife2D:
             else:
                 return 0
 
-    def step(self): # pylint: disable=missing-function-docstring
+    def Step(self): # pylint: disable=missing-function-docstring
         nextGeneration = self.lastLastGeneration
-        for x in range(0, self.x):
-            for y in range(0, self.y):
+        for x in range(0, self.X):
+            for y in range(0, self.Y):
                 nextGeneration[y][x] = self.nextState(x, y)
 
         self.lastLastGeneration = self.lastGeneration
         self.lastGeneration = self.world
         self.world = nextGeneration
-        self.display()
+        self.Update()
 
     def populationCount(self):
         c = 0
-        for x in range(0, self.x):
-            for y in range(0, self.y):
+        for x in range(0, self.X):
+            for y in range(0, self.Y):
                 c = c + self.world[y][x]
         return c
 
     def compareWorld(self, w1, w2):
-        #print("compareWorkd()")
-        for y in range(0, self.y):
-            for x in range(0, self.x):
+        for y in range(0, self.Y):
+            for x in range(0, self.X):
                 if not w1[y][x] == w2[y][x]:
                     return False
         return True
 
-    def run(self, delay=30):          # pylint: disable=missing-function-docstring
+    def Run(self, delay=30):          # pylint: disable=missing-function-docstring
         from time import sleep_ms     # pylint: disable=no-name-in-module
         population = self.populationCount()
         lastPopulation = 0
         lastLastPopulation = 0
         while True:
-            # reseed decisions
+            # re-seed decisions
+            # detect empty playfield
             if population == 0:
-                print("run: pop == 0")
-                self.seed()
+                print("Run(): pop == 0")
+                self.Seed()
+            # detect 1-cycle or 2-cycles
             elif population == lastLastPopulation:
-                print("run: pop == lastLastPop")
+                print("Run(): pop == lastLastPop")
                 if self.compareWorld(self.world, self.lastLastGeneration):
-                    print("run: 2-cycle detected")
-                    self.seed()
+                    print("Run(): 2-cycle detected")
+                    self.Seed()
 
             lastLastPopulation = lastPopulation
             lastPopulation = population
 
-            self.step()
+            self.Step()
             population = self.populationCount()
             sleep_ms(delay)
 
