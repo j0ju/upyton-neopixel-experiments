@@ -66,9 +66,9 @@ class GameOfLife2D(Field):
                         self.world[y][x] = v
                     except IndexError:
                         pass
-        self.Update()
+        self.Display()
 
-    def Update(self):
+    def Display(self):
         m = (self.DEAD, self.ALIVE)
         for y in range(0, self.Y):
             for x in range(0, self.X):
@@ -84,7 +84,7 @@ class GameOfLife2D(Field):
                         self[x,y] = self.FORECAST
                     else:
                         self[x,y] = m[self.world[y][x]]
-        Field.Update(self)
+        self.Update()
 
     def neighbourCount(self, x, y): # pylint: disable=missing-function-docstring
         count = 0
@@ -124,7 +124,7 @@ class GameOfLife2D(Field):
         self.lastLastGeneration = self.lastGeneration
         self.lastGeneration = self.world
         self.world = nextGeneration
-        self.Update()
+        self.Display()
 
     def populationCount(self):
         c = 0
@@ -145,24 +145,28 @@ class GameOfLife2D(Field):
         population = self.populationCount()
         lastPopulation = 0
         lastLastPopulation = 0
+        iterations = 0
         while True:
             # re-seed decisions
             # detect empty playfield
             if population == 0:
-                print("Run(): pop == 0")
+                print("Run(): pop == 0, %s iterations", iterations)
                 self.Seed()
+                iterations = 0
             # detect 1-cycle or 2-cycles
             elif population == lastLastPopulation:
-                print("Run(): pop == lastLastPop")
+                #print("Run(): pop == lastLastPop")
                 if self.compareWorld(self.world, self.lastLastGeneration):
-                    print("Run(): 2-cycle detected")
+                    print("Run(): 2-cycle detected, %s iterations" % iterations)
                     self.Seed()
+                    iterations = 0
 
             lastLastPopulation = lastPopulation
             lastPopulation = population
 
             self.Step()
             population = self.populationCount()
+            iterations = iterations + 1
             sleep_ms(delay)
 
 # vim: noet ts=4 sw=4 ft=python
