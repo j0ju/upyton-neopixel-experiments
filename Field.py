@@ -17,7 +17,7 @@ class Field:
 
         gpio = Pin(pin, Pin.OUT)
         self.np = NeoPixel(gpio, n)
-        strip.off(self.np)
+        self.Wipe()
 
     # be aware, we cannot use standard framebuffer calculations here on most WS2812 strips/fields
     # as they are enumbered as a snake on PCBs
@@ -34,7 +34,16 @@ class Field:
 
     def __setitem__(self, k, v):
         self.np[self.xy2cell(k[0],k[1])] = v
-    
+
+    def Wipe(self):
+        strip.off(self.np)
+
+    def Fill(self, xmin, ymin, xmax, ymax, color):
+        for x in range(xmin, xmax):
+            for y in range(ymin, ymax):
+                self[x,y] = color
+        self.Update()
+
     def Update(self):
         self.np.write()
 
