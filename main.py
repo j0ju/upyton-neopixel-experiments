@@ -13,4 +13,4 @@
 # cycling rainbow on 15 LEDs
 #strip.movingPaint(strip.RAINBOW, n = 15, delay_ms = 70)
 
-# vim: noet ts=4 sw=4 ft=python
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent

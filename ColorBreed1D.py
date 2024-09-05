@@ -92,4 +92,4 @@ class game:
             if not self.np[i] == DEAD:
                 print("%s: %s" % (i, self.np[i]))
 
-# vim: noet ts=4 sw=4 ft=python
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent

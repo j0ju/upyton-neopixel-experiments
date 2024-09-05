@@ -64,4 +64,4 @@ class GameOfLife1D:
             self.step()
             sleep_ms(delay)
 
-# vim: noet ts=4 sw=4 ft=python
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent

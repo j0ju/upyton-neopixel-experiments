@@ -122,4 +122,4 @@ def paint(np, colortable, istart = 0):
         np[i] = colortable[(istart + i) % ncolors]
     np.write()
 
-# vim: noet ts=4 sw=4 ft=python
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent

@@ -17,4 +17,4 @@
 #except Exception as e:
 #    raise(e)
 
-# vim: noet ts=4 sw=4 ft=python
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent

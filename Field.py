@@ -48,3 +48,4 @@ class Field:
     def Update(self):
         self.np.write()
 
+# vim: noet ts=4 sw=4 ft=python foldmethod=indent
