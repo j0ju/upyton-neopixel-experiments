@@ -2,7 +2,7 @@
 # (C) 2023/2024 Joerg Jungermann, GPLv2 see LICENSE
 
 import strip
-from Field import Field
+from NeoPixelField import NeoPixelField
 
 GLIDER = ( ( 1, 1, 1 ),
            ( 1, 0, 0 ),
@@ -25,7 +25,7 @@ g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
 g.run()
 """
 
-class GameOfLife2D(Field):
+class GameOfLife2D(NeoPixelField):
     # pin = 5 ---> D1 on Wemos D1
     # pin = 5 ---> D3 on Seeed Studio ESP32-C3
     def __init__(self, x = 16, y = 16, pin = 5, dead = strip.BLACK, alive = strip.DIMWHITE, dying = strip.DIMWHITE, born = strip.DIMWHITE, forecast = strip.BLACK, seed = None):

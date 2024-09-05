@@ -3,13 +3,13 @@
 
 import strip
 
-class Field:
+class NeoPixelField:
 
     def __init__(self, x = 16, y = 16, pin = 5):
         from machine import Pin       # pylint: disable=import-error
         from neopixel import NeoPixel # pylint: disable=import-error
 
-        print("Field::__init__(): %s/%s pin=%s)" % (x, y, pin))
+        print("NeoPixelField::__init__(): %s/%s pin=%s)" % (x, y, pin))
 
         self.X = x
         self.Y = y

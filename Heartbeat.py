@@ -1,10 +1,10 @@
 from math import sin, pi, floor
 from random import randint
-from Field import Field
+from NeoPixelField import NeoPixelField
 from time import sleep_ms     
 import strip
 
-class Heartbeat(Field):	
+class Heartbeat(NeoPixelField):	
     # pin = 5 ---> D1 on Wemos D1
     # pin = 5 ---> D3 on Seeed Studio ESP32-C3
     def Sine(self, dx = 0, color=strip.DIMWHITE, Update = True):
