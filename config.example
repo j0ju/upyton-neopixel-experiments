@@ -1,0 +1,8 @@
+# - Makefile -
+# config for ./Makefile
+
+#SERIAL = /dev/ttyUSB0
+SERIAL = /dev/ttyACM0
+#SPEED = 115200
+
+# vim: ts=2 sw=2 noet ft=make
