@@ -49,6 +49,13 @@ RAINBOW = [ # https://wiki.baw.de/de/index.php/Farbverlauf:_Regenbogen,_29_Farbe
     (168,   0, 185)
 ]
 
+RGB = [
+    DIMRED,
+    DIMGREEN,
+    DIMBLUE,
+    BLACK
+]
+
 # pin = 0 --> D3 on ESP8266 Wemos D1
 def wanderingPixel(fg = DIMWHITE, n = 15, bg = BLACK, pin = 0, delay_ms = 50):
     """ this implements one wandering pixel on a 2D LED strip """
@@ -97,15 +104,16 @@ def movingPaint(colortable, n = 15, pin = 0, delay_ms = 100):
         off(np)
         raise e
 
-def off(np):
+def off(np, write = True):
     """ switches all LEDs to black off a strip """
-    fill(np, BLACK)
+    fill(np, BLACK, write = write)
 
-def fill(np, color):
+def fill(np, color, write = True):
     """ fills all LEDs with one color """
     for  i in range(0, len(np)):
         np[i] = color
-    np.write()
+    if write:
+        np.write()
 
 def paint(np, colortable, istart = 0):
     """ changes colors of LED stip according to a table """
