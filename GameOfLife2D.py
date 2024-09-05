@@ -69,21 +69,21 @@ class GameOfLife2D(Field):
         self.Display()
 
     def Display(self):
-        m = (self.DEAD, self.ALIVE)
         for y in range(0, self.Y):
             for x in range(0, self.X):
-                if self.world[y][x] == 1:
-                    if self.lastGeneration[y][x] == 0:
-                        self[x,y] = self.BORN
-                    elif self.nextState(x,y) == 0:
-                        self[x,y] = self.DYING
-                    else:
-                        self[x,y] = m[self.world[y][x]]
-                else:
-                    if self.nextState(x,y) == 1:
-                        self[x,y] = self.FORECAST
-                    else:
-                        self[x,y] = m[self.world[y][x]]
+                if not self.world[y][x] == self.lastGeneration[y][x]:
+					if self.world[y][x] == 1:
+						if self.lastGeneration[y][x] == 0:
+							self[x,y] = self.BORN
+						elif self.nextState(x,y) == 0:
+							self[x,y] = self.DYING
+						else:
+							self[x,y] = self.ALIVE
+					else:
+						if self.nextState(x,y) == 1:
+							self[x,y] = self.FORECAST
+						else:
+							self[x,y] = self.DEAD
         self.Update()
 
     def neighbourCount(self, x, y): # pylint: disable=missing-function-docstring
