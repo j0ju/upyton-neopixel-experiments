@@ -1,2 +1,4 @@
+.deps
+.env
 .*sw[a-z]
 *.pyc
