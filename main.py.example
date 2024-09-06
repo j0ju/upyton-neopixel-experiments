@@ -18,4 +18,10 @@
 #g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
 #g.Run()
 
+#g.Wipe()
+#g.Seed(GameOfLife2D.SPACESHIP)
+#g.Seed(GameOfLife2D.SPACESHIP, dx=8,dy=8)
+#g.Seed(GameOfLife2D.SPACESHIP, dx=0,dy=6)
+#g.Run()
+
 # vim: noet ts=4 sw=4 ft=python foldmethod=indent
