@@ -88,7 +88,6 @@ class GameOfLife2D(NeoPixelField):
                 x = 0
                 py = ( y + dy ) % self.Y
                 l = l.strip()
-                #print("y=%s %s" % (y, l))
                 for ch in l:
                     v = None
                     px = ( x + dx ) % self.X
@@ -96,7 +95,6 @@ class GameOfLife2D(NeoPixelField):
                         v=1
                     elif ch == 46: # b'.'
                         v=0
-                    #print("%s/%s => %s/%s = b'%s' = %s" % (x,y, px, py, str(ch), v))
                     if not v == None:
                         self.world[py][px] = v
                         self.lastGeneration[py][px] = (v+1)%2
@@ -106,12 +104,10 @@ class GameOfLife2D(NeoPixelField):
 
         self.Display()
 
-    # TODO: sync == False is broken for speed up
-    def Display(self, sync = False):
+    def Display(self):
         for y in range(0, self.Y):
             for x in range(0, self.X):
-                if sync or not self.world[y][x] == self.lastGeneration[y][x]:
-                    #print("%s/%s %s -> %s" % (x,y,self.lastGeneration[y][x], self.world[y][x])) 
+                if not self.world[y][x] == self.lastGeneration[y][x]:
                     if self.world[y][x] == 1:
                         #print("  alive")
                         if self.lastGeneration[y][x] == 0:
@@ -157,7 +153,7 @@ class GameOfLife2D(NeoPixelField):
             else:
                 return 0
 
-    def Step(self, Display = True, sync = False): # pylint: disable=missing-function-docstring
+    def Step(self, Display = True): # pylint: disable=missing-function-docstring
         nextGeneration = self.lastLastGeneration
         for x in range(0, self.X):
             for y in range(0, self.Y):
@@ -168,7 +164,7 @@ class GameOfLife2D(NeoPixelField):
         self.world = nextGeneration
 
         if Display:
-            self.Display(sync = sync)
+            self.Display()
 
     def populationCount(self):
         c = 0
@@ -184,7 +180,7 @@ class GameOfLife2D(NeoPixelField):
                     return False
         return True
 
-    def Run(self, delay=30, lockDetection = True, sync = False):          # pylint: disable=missing-function-docstring
+    def Run(self, delay=30, cycleDetection = True):          # pylint: disable=missing-function-docstring
         from time import sleep_ms     # pylint: disable=no-name-in-module
         population = self.populationCount()
         lastPopulation = 0
@@ -193,14 +189,13 @@ class GameOfLife2D(NeoPixelField):
         while True:
             # re-seed decisions
             # detect empty playfield
-            if lockDetection:
+            if cycleDetection:
                 if population == 0:
                     print("Run(): pop == 0, %s iterations" % iterations)
                     self.Seed()
                     iterations = 0
                 # detect 1-cycle or 2-cycles
                 elif population == lastLastPopulation:
-                    #print("Run(): pop == lastLastPop")
                     if self.compareWorld(self.world, self.lastLastGeneration):
                         print("Run(): 2-cycle detected, %s iterations" % iterations)
                         self.Seed()
@@ -209,7 +204,7 @@ class GameOfLife2D(NeoPixelField):
             lastLastPopulation = lastPopulation
             lastPopulation = population
 
-            self.Step(sync = sync)
+            self.Step()
             population = self.populationCount()
             iterations = iterations + 1
             sleep_ms(delay)
