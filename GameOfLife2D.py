@@ -25,6 +25,15 @@ SPACESHIP = b"""
     .......
 """
 
+# 2-Cycle
+CROSS = b"""
+    .....
+    .....
+    .###.
+    .....
+    .....
+"""
+
 # example:
 #   import GameOfLife2D; g = GameOfLife2D.GameOfLife2D(); g.Run()
 # preseeds:
@@ -67,8 +76,12 @@ class GameOfLife2D(NeoPixelField):
         if seed == None:
             from random import getrandbits
             for y in range(0, self.Y):
+                py = ( y + dy ) % self.Y
                 for x in range(0, self.X):
-                    self.world[(y+dy)%self.Y][(x+dx)%self.X] = getrandbits(1)
+                    px = ( x + dx ) % self.X
+                    v = getrandbits(1)
+                    self.world[py][px] = v
+                    self.lastGeneration[py][px] = (v+1)%2
         else:
             y = 0
             for l in seed.strip().split(b'\n'):
@@ -86,7 +99,7 @@ class GameOfLife2D(NeoPixelField):
                     #print("%s/%s => %s/%s = b'%s' = %s" % (x,y, px, py, str(ch), v))
                     if not v == None:
                         self.world[py][px] = v
-                        self.lastLastGeneration[py][px] = (v+1)%2
+                        self.lastGeneration[py][px] = (v+1)%2
                     x += 1
 
                 y += 1
@@ -94,11 +107,13 @@ class GameOfLife2D(NeoPixelField):
         self.Display()
 
     # TODO: sync == False is broken for speed up
-    def Display(self, sync = True):
+    def Display(self, sync = False):
         for y in range(0, self.Y):
             for x in range(0, self.X):
                 if sync or not self.world[y][x] == self.lastGeneration[y][x]:
-                    if self.world[x][y] == 1:
+                    #print("%s/%s %s -> %s" % (x,y,self.lastGeneration[y][x], self.world[y][x])) 
+                    if self.world[y][x] == 1:
+                        #print("  alive")
                         if self.lastGeneration[y][x] == 0:
                             self[x,y] = self.BORN
                         elif self.nextState(x,y) == 0:
@@ -106,6 +121,7 @@ class GameOfLife2D(NeoPixelField):
                         else:
                             self[x,y] = self.ALIVE
                     else:
+                        #print("  dead")
                         if self.nextState(x,y) == 1:
                             self[x,y] = self.FORECAST
                         else:
@@ -141,7 +157,7 @@ class GameOfLife2D(NeoPixelField):
             else:
                 return 0
 
-    def Step(self): # pylint: disable=missing-function-docstring
+    def Step(self, Display = True, sync = False): # pylint: disable=missing-function-docstring
         nextGeneration = self.lastLastGeneration
         for x in range(0, self.X):
             for y in range(0, self.Y):
@@ -150,7 +166,9 @@ class GameOfLife2D(NeoPixelField):
         self.lastLastGeneration = self.lastGeneration
         self.lastGeneration = self.world
         self.world = nextGeneration
-        self.Display()
+
+        if Display:
+            self.Display(sync = sync)
 
     def populationCount(self):
         c = 0
@@ -166,7 +184,7 @@ class GameOfLife2D(NeoPixelField):
                     return False
         return True
 
-    def Run(self, delay=30):          # pylint: disable=missing-function-docstring
+    def Run(self, delay=30, lockDetection = True, sync = False):          # pylint: disable=missing-function-docstring
         from time import sleep_ms     # pylint: disable=no-name-in-module
         population = self.populationCount()
         lastPopulation = 0
@@ -175,22 +193,23 @@ class GameOfLife2D(NeoPixelField):
         while True:
             # re-seed decisions
             # detect empty playfield
-            if population == 0:
-                print("Run(): pop == 0, %s iterations" % iterations)
-                self.Seed()
-                iterations = 0
-            # detect 1-cycle or 2-cycles
-            elif population == lastLastPopulation:
-                #print("Run(): pop == lastLastPop")
-                if self.compareWorld(self.world, self.lastLastGeneration):
-                    print("Run(): 2-cycle detected, %s iterations" % iterations)
+            if lockDetection:
+                if population == 0:
+                    print("Run(): pop == 0, %s iterations" % iterations)
                     self.Seed()
                     iterations = 0
+                # detect 1-cycle or 2-cycles
+                elif population == lastLastPopulation:
+                    #print("Run(): pop == lastLastPop")
+                    if self.compareWorld(self.world, self.lastLastGeneration):
+                        print("Run(): 2-cycle detected, %s iterations" % iterations)
+                        self.Seed()
+                        iterations = 0
 
             lastLastPopulation = lastPopulation
             lastPopulation = population
 
-            self.Step()
+            self.Step(sync = sync)
             population = self.populationCount()
             iterations = iterations + 1
             sleep_ms(delay)
