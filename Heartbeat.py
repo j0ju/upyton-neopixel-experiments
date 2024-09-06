@@ -1,8 +1,20 @@
 from math import sin, pi, floor
-from random import randint
 from NeoPixelField import NeoPixelField
 from time import sleep_ms     
 import strip
+
+try:
+    from random import randint
+except ImportError:
+    import urandom
+
+    def randint(min, max):
+        span = max - min + 1
+        div = 0x3fffffff // span
+        offset = urandom.getrandbits(30) // div
+        val = min + offset
+        return val
+
 
 class Heartbeat(NeoPixelField):	
     # pin = 5 ---> D1 on Wemos D1
@@ -29,12 +41,12 @@ class Heartbeat(NeoPixelField):
 
     def RandomBoxes(self, palette, delay=30):
         while True:
-            xmin = randint(0, self.X-1)
-            ymin = randint(0, self.Y-1)
-            xmax = randint(xmin, self.X-1)
-            ymax = randint(ymin, self.Y-1)
+            dx = randint(3, 6)
+            dy = randint(3, 6)
+            x = randint(0, self.X-dx)
+            y = randint(0, self.Y-dy)
             colorindex = randint(0, len(palette)-1)
-            self.Fill(xmin, ymin, xmax, ymax, palette[colorindex])
+            self.Fill(x, y, x+dx, y+dy, palette[colorindex])
             sleep_ms(delay)
 
 # vim: noet ts=4 sw=4 ft=python foldmethod=indent
