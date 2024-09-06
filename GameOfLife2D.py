@@ -4,26 +4,32 @@
 import strip
 from NeoPixelField import NeoPixelField
 
-GLIDER = ( ( 1, 1, 1 ),
-           ( 1, 0, 0 ),
-           ( 0, 1, 0 )
-         )
+# b'#' - alive
+# b'.' - dead
+# b'_' - don't touch
 
-SPACESHIP = ( ( 1, 0, 0, 1, 0),
-              ( 0, 0, 0, 0, 1),
-              ( 1, 0, 0, 0, 1),
-              ( 0, 1, 1, 1, 1)
-            )
-
-""" example:
-import GameOfLife2D
-g = GameOfLife2D.GameOfLife2D()
-g.run()
-
-g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.GLIDER)
-g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
-g.run()
+GLIDER = b"""
+    .....
+    .###.
+    .#...
+    ..#..
+    .....
 """
+
+SPACESHIP = b"""
+    .......
+    .#..#..
+    .....#.
+    .#...#.
+    ..####.
+    .......
+"""
+
+# example:
+#   import GameOfLife2D; g = GameOfLife2D.GameOfLife2D(); g.Run()
+# preseeds:
+#   g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.GLIDER)
+#   g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
 
 class GameOfLife2D(NeoPixelField):
     # pin = 5 ---> D1 on Wemos D1
@@ -38,6 +44,10 @@ class GameOfLife2D(NeoPixelField):
         self.BORN = born
         self.FORECAST = forecast
 
+        self.Wipe()
+        self.Seed(seed)
+
+    def Wipe(self):
         self.world = []
         self.lastGeneration = []
         self.lastLastGeneration = []
@@ -47,43 +57,59 @@ class GameOfLife2D(NeoPixelField):
             self.lastLastGeneration.append([])
             for x in range(0, self.X):
                 self.world[y].append(0)
-                self.lastGeneration[y].append(0)
+                self.lastGeneration[y].append(1)
                 self.lastLastGeneration[y].append(0)
-
-        self.Seed(seed)
+        super().Wipe()
     
     # seed world and prepare world array for swaping
-    def Seed(self, seed = None):
+    def Seed(self, seed = None, dx = 0, dy = 0):
         print("Seed()")
-        from random import getrandbits
-        for y in range(0, self.Y):
-            for x in range(0, self.X):
-                if seed == None:
-                    self.world[y][x] = getrandbits(1)
-                else:
-                    try:
-                        v = seed[x][y]
-                        self.world[y][x] = v
-                    except IndexError:
-                        pass
+        if seed == None:
+            from random import getrandbits
+            for y in range(0, self.Y):
+                for x in range(0, self.X):
+                    self.world[(y+dy)%self.Y][(x+dx)%self.X] = getrandbits(1)
+        else:
+            y = 0
+            for l in seed.strip().split(b'\n'):
+                x = 0
+                py = ( y + dy ) % self.Y
+                l = l.strip()
+                #print("y=%s %s" % (y, l))
+                for ch in l:
+                    v = None
+                    px = ( x + dx ) % self.X
+                    if ch == 35: # b'#'
+                        v=1
+                    elif ch == 46: # b'.'
+                        v=0
+                    #print("%s/%s => %s/%s = b'%s' = %s" % (x,y, px, py, str(ch), v))
+                    if not v == None:
+                        self.world[py][px] = v
+                        self.lastLastGeneration[py][px] = (v+1)%2
+                    x += 1
+
+                y += 1
+
         self.Display()
 
-    def Display(self):
+    # TODO: sync == False is broken for speed up
+    def Display(self, sync = True):
         for y in range(0, self.Y):
             for x in range(0, self.X):
-                if not self.world[y][x] == self.lastGeneration[y][x]:
-					if self.world[y][x] == 1:
-						if self.lastGeneration[y][x] == 0:
-							self[x,y] = self.BORN
-						elif self.nextState(x,y) == 0:
-							self[x,y] = self.DYING
-						else:
-							self[x,y] = self.ALIVE
-					else:
-						if self.nextState(x,y) == 1:
-							self[x,y] = self.FORECAST
-						else:
-							self[x,y] = self.DEAD
+                if sync or not self.world[y][x] == self.lastGeneration[y][x]:
+                    if self.world[x][y] == 1:
+                        if self.lastGeneration[y][x] == 0:
+                            self[x,y] = self.BORN
+                        elif self.nextState(x,y) == 0:
+                            self[x,y] = self.DYING
+                        else:
+                            self[x,y] = self.ALIVE
+                    else:
+                        if self.nextState(x,y) == 1:
+                            self[x,y] = self.FORECAST
+                        else:
+                            self[x,y] = self.DEAD
         self.Update()
 
     def neighbourCount(self, x, y): # pylint: disable=missing-function-docstring
@@ -150,7 +176,7 @@ class GameOfLife2D(NeoPixelField):
             # re-seed decisions
             # detect empty playfield
             if population == 0:
-                print("Run(): pop == 0, %s iterations", iterations)
+                print("Run(): pop == 0, %s iterations" % iterations)
                 self.Seed()
                 iterations = 0
             # detect 1-cycle or 2-cycles
