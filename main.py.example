@@ -13,4 +13,9 @@
 # cycling rainbow on 15 LEDs
 #strip.movingPaint(strip.RAINBOW, n = 15, delay_ms = 70)
 
+#import strip, GameOfLife2D; 
+#g = GameOfLife2D.GameOfLife2D()
+#g = GameOfLife2D.GameOfLife2D(seed=GameOfLife2D.SPACESHIP)
+#g.Run()
+
 # vim: noet ts=4 sw=4 ft=python foldmethod=indent

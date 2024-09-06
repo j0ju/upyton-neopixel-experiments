@@ -3,3 +3,5 @@
 .*sw[a-z]
 *.pyc
 config
+boot.py
+main.py
